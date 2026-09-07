@@ -106,6 +106,37 @@ def update_env_file(updates: dict):
     with open(ENV_FILE, "w", encoding="utf-8") as f:
         f.writelines(new_lines)
 
+    # Đồng bộ song song sang config.json
+    try:
+        cfg_path = os.path.abspath("config.json")
+        cfg_data = {}
+        if os.path.exists(cfg_path):
+            with open(cfg_path, "r", encoding="utf-8") as cf:
+                cfg_data = json.load(cf)
+        if "TASKS" in updates:
+            try:
+                t_list = json.loads(updates["TASKS"])
+                if t_list and isinstance(t_list, list):
+                    cfg_data["account"] = t_list[0]
+            except Exception:
+                pass
+        if "STREAK_LANGUAGE" in updates:
+            cfg_data["streak_language"] = updates["STREAK_LANGUAGE"]
+        if "MESSAGE_TEMPLATE" in updates:
+            cfg_data["message_template"] = updates["MESSAGE_TEMPLATE"]
+        if "SCHEDULE_TIMES" in updates:
+            cfg_data["schedule_times"] = [x.strip() for x in updates["SCHEDULE_TIMES"].split(",") if x.strip()]
+        if "RANDOM_DELAY_MINUTES" in updates:
+            try:
+                cfg_data["random_delay_minutes"] = int(updates["RANDOM_DELAY_MINUTES"])
+            except Exception:
+                pass
+        cfg_data["last_updated"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        with open(cfg_path, "w", encoding="utf-8") as cf:
+            json.dump(cfg_data, cf, ensure_ascii=False, indent=2)
+    except Exception as ex:
+        print(f"Lỗi đồng bộ config.json: {ex}")
+
 
 def update_github_workflow_schedule(times_vn: list):
     """

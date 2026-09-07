@@ -188,6 +188,69 @@
       font-size: 0.75rem;
     }
 
+    .sync-dot.cloud {
+      background: #3b82f6;
+      box-shadow: 0 0 8px #3b82f6;
+    }
+
+    /* Modal Token Dialog */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      max-width: 480px;
+      width: 90%;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .modal-card h3 {
+      font-size: 1.1rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .modal-card p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+    .modal-input {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.6rem 0.8rem;
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      outline: none;
+    }
+    .modal-input:focus {
+      border-color: var(--accent-primary);
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.6rem;
+    }
+
     /* Main Container */
     main {
       max-width: 1200px;
@@ -719,10 +782,13 @@
       </div>
 
       <div class="header-actions">
-        <div id="syncBadge" class="sync-status">
+        <div id="syncBadge" class="sync-status" onclick="openTokenModal()" style="cursor: pointer;" title="Nhấn để cấu hình GitHub Token đồng bộ trực tiếp">
           <div id="syncDot" class="sync-dot"></div>
           <span id="syncText">Đang kiểm tra kết nối...</span>
         </div>
+        <button id="btnConnectGitHub" class="btn btn-secondary btn-sm" onclick="openTokenModal()">
+          <span>🔑</span> Kết Nối GitHub
+        </button>
         <button id="btnRunNow" class="btn btn-primary btn-sm" onclick="runStreakTest()">
           <span>▶️</span> Chạy Rep Chuỗi Ngay
         </button>
@@ -736,12 +802,15 @@
     <!-- Offline Warning Notice (if not opened via app_manager.py) -->
     <div id="offlineBanner" class="offline-banner">
       <div>
-        <strong>⚠️ Đang mở ở chế độ Ngoại tuyến (Offline Preview)</strong>
-        <p style="font-size: 0.76rem; color: #d6d3d1; margin-top: 2px;">
-          Để tự động đồng bộ thời gian và lưu thẳng vào file <code>.env</code> & <code>schedule.yml</code>, hãy mở bằng <strong>Mo_Trinh_Quan_Ly.bat</strong>!
+        <strong id="offlineBannerTitle">☁️ Quản lý & Đồng bộ Online qua GitHub Cloud</strong>
+        <p id="offlineBannerDesc" style="font-size: 0.76rem; color: #d6d3d1; margin-top: 2px;">
+          Kết nối mã <strong>GitHub Personal Access Token</strong> để mọi thao tác thêm/xóa bạn bè, đổi lời nhắn, chỉnh giờ trên web đều <strong>tự động lưu vào GitHub 24/7</strong>!
         </p>
       </div>
-      <button class="btn btn-secondary btn-sm" onclick="checkLocalServer()">Thử kết nối lại</button>
+      <div style="display: flex; gap: 0.5rem;">
+        <button class="btn btn-primary btn-sm" onclick="openTokenModal()">🔑 Nhập GitHub Token</button>
+        <button class="btn btn-secondary btn-sm" onclick="checkLocalServer()">Kiểm tra Local</button>
+      </div>
     </div>
 
     <!-- Stats KPI Bar -->
@@ -1025,6 +1094,30 @@
   <!-- Toast Notification -->
   <div id="toast">Thông báo</div>
 
+  <!-- Modal Nhập GitHub Token Để Tự Động Đồng Bộ 24/7 -->
+  <div id="tokenModal" class="modal-overlay">
+    <div class="modal-card">
+      <h3><span>🔑</span> Đồng Bộ Trực Tiếp Với GitHub</h3>
+      <p>
+        Dán mã <strong>GitHub Personal Access Token</strong> của bạn vào đây để mọi thao tác (thêm/xóa bạn bè, đổi lời nhắn, chỉnh giờ) trên điện thoại hoặc trình duyệt web <strong>tự động lưu trực tiếp vào GitHub</strong>!
+      </p>
+      <div>
+        <label style="font-size: 0.76rem; color: var(--text-dim); display: block; margin-bottom: 4px;">GITHUB REPOSITORY</label>
+        <input id="githubRepoInput" class="modal-input" type="text" value="huy22122/tiktok-streak-saver" placeholder="username/repo-name" style="margin-bottom: 0.8rem;">
+        
+        <label style="font-size: 0.76rem; color: var(--text-dim); display: block; margin-bottom: 4px;">PERSONAL ACCESS TOKEN (ghp_...)</label>
+        <input id="githubTokenInput" class="modal-input" type="password" placeholder="Dán mã ghp_... của bạn vào đây">
+      </div>
+      <div style="font-size: 0.75rem; color: #10b981; display: flex; align-items: center; gap: 4px;">
+        <span>🔒</span> Token được lưu an toàn trong trình duyệt của bạn (LocalStorage).
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary btn-sm" onclick="closeTokenModal()">Đóng</button>
+        <button class="btn btn-primary btn-sm" onclick="saveGitHubToken()">Lưu & Kết Nối Ngay</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     let state = {
       isLocalConnected: false,
@@ -1066,6 +1159,145 @@
       ]
     };
 
+    // GitHub Cloud Sync State
+    let githubState = {
+      token: localStorage.getItem("github_token") || "",
+      repo: localStorage.getItem("github_repo") || "huy22122/tiktok-streak-saver",
+      fileSha: null,
+      isCloudConnected: false,
+    };
+
+    function openTokenModal() {
+      document.getElementById("githubTokenInput").value = githubState.token || "";
+      document.getElementById("githubRepoInput").value = githubState.repo || "huy22122/tiktok-streak-saver";
+      document.getElementById("tokenModal").classList.add("active");
+    }
+
+    function closeTokenModal() {
+      document.getElementById("tokenModal").classList.remove("active");
+    }
+
+    async function saveGitHubToken() {
+      const token = document.getElementById("githubTokenInput").value.trim();
+      const repo = document.getElementById("githubRepoInput").value.trim();
+      if (!token) {
+        showToast("Vui lòng nhập GitHub Token!", "warning");
+        return;
+      }
+      githubState.token = token;
+      githubState.repo = repo || "huy22122/tiktok-streak-saver";
+      localStorage.setItem("github_token", token);
+      localStorage.setItem("github_repo", githubState.repo);
+      closeTokenModal();
+      showToast("⏳ Đang kết nối tới GitHub...", "info");
+      await syncWithGitHub();
+    }
+
+    async function syncWithGitHub() {
+      if (!githubState.token) {
+        // Thử đọc config.json công khai từ repo nếu chưa có token
+        try {
+          const res = await fetch(`https://raw.githubusercontent.com/${githubState.repo}/main/config.json?t=${Date.now()}`);
+          if (res.ok) {
+            const data = await res.json();
+            applyConfig(data);
+          }
+        } catch (e) {}
+        return false;
+      }
+
+      try {
+        const url = `https://api.github.com/repos/${githubState.repo}/contents/config.json`;
+        const res = await fetch(url, {
+          headers: {
+            "Authorization": `token ${githubState.token}`,
+            "Accept": "application/vnd.github.v3+json"
+          }
+        });
+
+        if (res.ok) {
+          const fileData = await res.json();
+          githubState.fileSha = fileData.sha;
+          githubState.isCloudConnected = true;
+          
+          // Giải mã nội dung Base64
+          const decoded = decodeURIComponent(escape(atob(fileData.content.replace(/\s/g, ''))));
+          const configJson = JSON.parse(decoded);
+          applyConfig(configJson);
+          setConnected(true, "GitHub Cloud 24/7", true);
+          showToast("🟢 Đã kết nối & đồng bộ trực tiếp với GitHub!");
+          return true;
+        } else if (res.status === 401 || res.status === 403) {
+          showToast("GitHub Token không hợp lệ hoặc hết hạn!", "error");
+        } else if (res.status === 404) {
+          // File chưa tồn tại trên repo, có thể tạo mới
+          githubState.isCloudConnected = true;
+          setConnected(true, "GitHub Cloud 24/7", true);
+          return true;
+        }
+      } catch (e) {
+        console.error("Lỗi sync GitHub:", e);
+      }
+      return false;
+    }
+
+    async function pushConfigToGitHub() {
+      if (!githubState.token || !githubState.isCloudConnected) {
+        return false;
+      }
+
+      const configPayload = {
+        account: {
+          username: state.accountName,
+          unique_id: "acc1",
+          targets: state.targets
+        },
+        streak_language: state.language,
+        message_template: state.template,
+        schedule_times: state.scheduleTimes,
+        random_delay_minutes: state.randomDelayMinutes,
+        last_updated: new Date().toISOString()
+      };
+
+      const contentStr = JSON.stringify(configPayload, null, 2);
+      const encoded = btoa(unescape(encodeURIComponent(contentStr)));
+
+      try {
+        const url = `https://api.github.com/repos/${githubState.repo}/contents/config.json`;
+        const bodyData = {
+          message: "Cập nhật cấu hình TikTok Streak từ Web Dashboard",
+          content: encoded,
+        };
+        if (githubState.fileSha) {
+          bodyData.sha = githubState.fileSha;
+        }
+
+        const res = await fetch(url, {
+          method: "PUT",
+          headers: {
+            "Authorization": `token ${githubState.token}`,
+            "Content-Type": "application/json",
+            "Accept": "application/vnd.github.v3+json"
+          },
+          body: JSON.stringify(bodyData)
+        });
+
+        if (res.ok) {
+          const resData = await res.json();
+          githubState.fileSha = resData.content.sha;
+          showToast("☁️ Đã đồng bộ & lưu thành công lên GitHub!");
+          return true;
+        } else {
+          const errData = await res.json();
+          showToast(`Lỗi lưu GitHub: ${errData.message || res.status}`, "error");
+        }
+      } catch (e) {
+        console.error(e);
+        showToast("Lỗi kết nối GitHub API: " + e, "error");
+      }
+      return false;
+    }
+
     async function checkLocalServer() {
       const ports = [7860, 7861, 7862, 5000];
       let connected = false;
@@ -1097,25 +1329,36 @@
       }
 
       if (!connected) {
-        setConnected(false);
+        // Nếu không có server local, thử kết nối qua GitHub Cloud
+        const cloudOk = await syncWithGitHub();
+        if (!cloudOk) {
+          setConnected(false);
+        }
       }
     }
 
-    function setConnected(isConnected, hostUrl = "") {
+    function setConnected(isConnected, hostUrl = "", isCloud = false) {
       state.isLocalConnected = isConnected;
       const dot = document.getElementById("syncDot");
       const text = document.getElementById("syncText");
       const banner = document.getElementById("offlineBanner");
+      const btnConnect = document.getElementById("btnConnectGitHub");
 
       if (isConnected) {
-        dot.className = "sync-dot connected";
-        text.innerText = "Đã kết nối trực tiếp với .env";
-        text.title = `Local Server API: ${hostUrl}`;
+        dot.className = isCloud ? "sync-dot cloud" : "sync-dot connected";
+        text.innerText = isCloud ? "🟢 Đã kết nối GitHub Cloud" : "🟢 Đã kết nối máy tính (.env)";
+        text.title = `Host: ${hostUrl}`;
         banner.classList.remove("active");
+        if (btnConnect) {
+          btnConnect.innerText = isCloud ? "⚙️ Đổi Token" : "🔑 Kết Nối GitHub";
+        }
       } else {
         dot.className = "sync-dot";
         text.innerText = "Chế độ Ngoại tuyến";
         banner.classList.add("active");
+        if (btnConnect) {
+          btnConnect.innerText = "🔑 Kết Nối GitHub";
+        }
       }
     }
 
@@ -1272,7 +1515,7 @@
     }
 
     async function saveScheduleSettings() {
-      if (state.isLocalConnected) {
+      if (state.isLocalConnected && !githubState.isCloudConnected) {
         try {
           const res = await fetch("/api/schedule", {
             method: "POST",
@@ -1284,13 +1527,16 @@
           });
           const data = await res.json();
           if (data.success) {
-            showToast(`✅ Đã lưu lịch [${state.scheduleTimes.join(", ")}] vào .env & GitHub Actions!`);
+            showToast(`✅ Đã lưu lịch [${state.scheduleTimes.join(", ")}] vào .env!`);
           }
         } catch (e) {
           console.error(e);
         }
       } else {
-        showToast(`Đã ghi nhận khung giờ [${state.scheduleTimes.join(", ")}] vào bộ nhớ.`);
+        showToast(`Đã ghi nhận khung giờ [${state.scheduleTimes.join(", ")}].`);
+      }
+      if (githubState.isCloudConnected) {
+        await pushConfigToGitHub();
       }
     }
 
@@ -1310,7 +1556,7 @@
 
       input.value = "";
 
-      if (state.isLocalConnected) {
+      if (state.isLocalConnected && !githubState.isCloudConnected) {
         try {
           const res = await fetch("/api/target/add", {
             method: "POST",
@@ -1331,12 +1577,15 @@
 
       state.targets.push(val);
       renderAll();
-      showToast(`Đã thêm "${val}" vào danh sách tạm thời.`);
+      showToast(`Đã thêm "${val}" vào danh sách.`);
+      if (githubState.isCloudConnected) {
+        await pushConfigToGitHub();
+      }
     }
 
     // Xóa mục tiêu
     async function deleteTarget(targetName) {
-      if (state.isLocalConnected) {
+      if (state.isLocalConnected && !githubState.isCloudConnected) {
         try {
           const res = await fetch("/api/target/delete", {
             method: "POST",
@@ -1358,6 +1607,9 @@
       state.targets = state.targets.filter(t => t !== targetName);
       renderAll();
       showToast(`Đã xóa "${targetName}".`);
+      if (githubState.isCloudConnected) {
+        await pushConfigToGitHub();
+      }
     }
 
     // Đổi ngôn ngữ
@@ -1365,7 +1617,7 @@
       state.language = lang;
       renderAll();
 
-      if (state.isLocalConnected) {
+      if (state.isLocalConnected && !githubState.isCloudConnected) {
         try {
           await fetch("/api/language", {
             method: "POST",
@@ -1376,6 +1628,9 @@
         } catch (e) {
           console.error(e);
         }
+      }
+      if (githubState.isCloudConnected) {
+        await pushConfigToGitHub();
       }
     }
 
@@ -1412,7 +1667,7 @@
       state.template = val;
       randomizePreview();
 
-      if (state.isLocalConnected) {
+      if (state.isLocalConnected && !githubState.isCloudConnected) {
         try {
           await fetch("/api/template", {
             method: "POST",
@@ -1424,7 +1679,10 @@
           showToast("Lỗi lưu template: " + e, "error");
         }
       } else {
-        showToast("Đã lưu mẫu tin nhắn vào bộ nhớ tạm.");
+        showToast("Đã lưu mẫu tin nhắn.");
+      }
+      if (githubState.isCloudConnected) {
+        await pushConfigToGitHub();
       }
     }
 
@@ -1433,9 +1691,55 @@
       const btn = document.getElementById("btnRunNow");
       const btn2 = document.getElementById("btnRunSecondary");
 
+      // Nếu đang kết nối qua GitHub Cloud (chạy trên điện thoại)
+      if (githubState.isCloudConnected && githubState.token) {
+        btn.disabled = true;
+        btn2.disabled = true;
+        btn.innerText = "⏳ Đang kích hoạt GitHub...";
+        btn2.innerText = "⏳ Đang kích hoạt GitHub Actions...";
+
+        appendLog("--------------------------------------------------");
+        appendLog(`[${new Date().toLocaleTimeString()}] 🚀 KÍCH HOẠT GITHUB ACTIONS CHẠY REP CHUỖI TỪ XA...`);
+        appendLog(`[REPO]: ${githubState.repo}`);
+        appendLog("--------------------------------------------------");
+
+        try {
+          const res = await fetch(`https://api.github.com/repos/${githubState.repo}/actions/workflows/schedule.yml/dispatches`, {
+            method: "POST",
+            headers: {
+              "Authorization": `token ${githubState.token}`,
+              "Accept": "application/vnd.github.v3+json",
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ ref: "main" })
+          });
+
+          if (res.status === 204 || res.ok) {
+            appendLog(`[THÀNH CÔNG] ✅ Đã kích hoạt máy chủ GitHub Actions chạy rep chuỗi!`);
+            appendLog(`[GHI CHÚ] Bạn có thể vào tab Actions trên GitHub để xem tiến trình live.`);
+            showToast("🚀 Đã kích hoạt GitHub Actions chạy rep chuỗi thành công!");
+          } else {
+            const err = await res.text();
+            appendLog(`[LỖI GITHUB] ${err || res.status}`);
+            showToast("Lỗi kích hoạt GitHub Actions: " + res.status, "error");
+          }
+        } catch (e) {
+          appendLog(`[LỖI GỌI GITHUB API] ${e}`);
+          showToast("Lỗi kết nối: " + e, "error");
+        } finally {
+          setTimeout(() => {
+            btn.disabled = false;
+            btn2.disabled = false;
+            btn.innerText = "▶️ Chạy Rep Chuỗi Ngay";
+            btn2.innerText = "▶️ Bắt Đầu Chạy Rep Chuỗi";
+          }, 3000);
+        }
+        return;
+      }
+
       if (!state.isLocalConnected) {
-        appendLog("[HỆ THỐNG] Đang ở chế độ ngoại tuyến. Vui lòng mở bằng file Mo_Trinh_Quan_Ly.bat để chạy tool!");
-        showToast("Vui lòng mở Mo_Trinh_Quan_Ly.bat để chạy trực tiếp!", "warning");
+        appendLog("[HỆ THỐNG] Đang ở chế độ ngoại tuyến. Vui lòng kết nối GitHub Token hoặc mở Mo_Trinh_Quan_Ly.bat!");
+        showToast("Vui lòng kết nối GitHub Token để chạy từ xa!", "warning");
         return;
       }
 

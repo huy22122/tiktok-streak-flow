@@ -44,24 +44,36 @@ def get_config():
     if config:
         return config
 
+    # Đọc cấu hình từ config.json nếu có (để đồng bộ web GitHub)
+    file_config = {}
+    config_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config.json")
+    if not os.path.exists(config_file_path):
+        config_file_path = "config.json"
+    if os.path.exists(config_file_path):
+        try:
+            with open(config_file_path, "r", encoding="utf-8") as f:
+                file_config = json.load(f)
+        except Exception as e:
+            logger.warning(f"Không thể đọc config.json: {e}")
+
     config = {
-        "proxyAddress": os.getenv("PROXY_ADDRESS", ""),
-        "streakLanguage": os.getenv("STREAK_LANGUAGE", "vi"), # Ngôn ngữ giữ chuỗi (vi / en / bilingual)
+        "proxyAddress": os.getenv("PROXY_ADDRESS", file_config.get("proxy_address", "")),
+        "streakLanguage": os.getenv("STREAK_LANGUAGE", file_config.get("streak_language", "vi")),
         "messageTemplate": os.getenv(
             "MESSAGE_TEMPLATE",
-            "[RANDOM_MESSAGE]",
+            file_config.get("message_template", "[RANDOM_MESSAGE]"),
         ),
         "hitokotoTypes": json.loads(
             os.getenv("HITOKOTO_TYPES", '["文学","影视","诗词","哲学"]')
         ),
         "browserTimeout": int(
-            os.getenv("BROWSER_TIMEOUT", "120000")
-        ),  # Thời gian chờ thao tác trình duyệt (ms)
+            os.getenv("BROWSER_TIMEOUT", str(file_config.get("browser_timeout", "120000")))
+        ),
         "friendListTimeout": int(
             os.getenv("FRIEND_LIST_WAIT_TIME", "3000")
-        ),  # Thời gian chờ tải danh sách bạn bè (ms)
-        "taskRetryTimes": int(os.getenv("TASK_RETRY_TIMES", "3")),  # Số lần thử lại
-        "logLevel": os.getenv("LOG_LEVEL", "DEBUG"),  # Cấp độ log
+        ),
+        "taskRetryTimes": int(os.getenv("TASK_RETRY_TIMES", str(file_config.get("task_retry_times", "3")))),
+        "logLevel": os.getenv("LOG_LEVEL", "DEBUG"),
     }
 
     return config
@@ -141,18 +153,37 @@ def get_userData():
     if userData:
         return userData
 
-    tasks_raw = os.getenv("TASKS", "[]").strip()
+    tasks_raw = os.getenv("TASKS", "").strip()
     if (tasks_raw.startswith("'") and tasks_raw.endswith("'")) or (tasks_raw.startswith('"') and tasks_raw.endswith('"')):
         tasks_raw = tasks_raw[1:-1].strip()
 
-    try:
-        tasks = json.loads(tasks_raw)
-    except json.JSONDecodeError:
+    tasks = []
+    if tasks_raw:
         try:
-            tasks = json.loads(tasks_raw.replace(r'\"', '"'))
-        except Exception:
-            logger.error("Biến môi trường TASKS không đúng định dạng JSON!")
-            tasks = []
+            tasks = json.loads(tasks_raw)
+        except json.JSONDecodeError:
+            try:
+                tasks = json.loads(tasks_raw.replace(r'\"', '"'))
+            except Exception:
+                logger.error("Biến môi trường TASKS không đúng định dạng JSON!")
+                tasks = []
+
+    # Nếu biến môi trường TASKS rỗng hoặc chưa set, đọc từ file config.json
+    if not tasks:
+        config_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config.json")
+        if not os.path.exists(config_file_path):
+            config_file_path = "config.json"
+        if os.path.exists(config_file_path):
+            try:
+                with open(config_file_path, "r", encoding="utf-8") as f:
+                    cfg = json.load(f)
+                    if "account" in cfg:
+                        tasks = [cfg["account"]]
+            except Exception as e:
+                logger.warning(f"Lỗi nạp tasks từ config.json: {e}")
+
+    if not tasks:
+        tasks = [{"username": "Tài khoản TikTok", "unique_id": "acc1", "targets": []}]
 
     userData = []
 
