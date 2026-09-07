@@ -1294,6 +1294,7 @@
       }
     }
 
+    // Thêm mục tiêu
     async function addTarget() {
       const input = document.getElementById("targetInput");
       const val = input.value.trim();
@@ -1333,6 +1334,7 @@
       showToast(`Đã thêm "${val}" vào danh sách tạm thời.`);
     }
 
+    // Xóa mục tiêu
     async function deleteTarget(targetName) {
       if (state.isLocalConnected) {
         try {
@@ -1358,6 +1360,7 @@
       showToast(`Đã xóa "${targetName}".`);
     }
 
+    // Đổi ngôn ngữ
     async function switchLanguage(lang) {
       state.language = lang;
       renderAll();
