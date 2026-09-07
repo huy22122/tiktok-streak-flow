@@ -16,14 +16,14 @@ echo.
 echo ======================================================================
 echo BAN CHON 1 TRONG 2 CACH DE DAY LEN GITHUB:
 echo.
-echo [1] Nhap Enter: Trinh duyet se tu dong bat len de ban dang nhap GitHub
-echo [2] Dan Personal Access Token (PAT) cua GitHub vao day
+echo [1] Nhan [Enter]: Trinh duyet se tu dong bat len de ban dang nhap GitHub
+echo [2] Dan ma Token moi (co quyen repo va workflow) vao day
 echo ======================================================================
-set /p USER_INPUT="👉 Nhap Token (hoac nhan Enter de dang nhap qua trinh duyet): "
+set /p USER_INPUT="👉 Nhap Token (hoac nhan Enter de dung trinh duyet): "
 
 if not "%USER_INPUT%"=="" (
-    echo Dang su dung Token de ket noi...
-    git remote set-url origin https://%USER_INPUT%@github.com/huy22122/tiktok-streak-saver.git
+    echo Dang su dung Token cua ban de ket noi...
+    git remote set-url origin https://huy22122:%USER_INPUT%@github.com/huy22122/tiktok-streak-saver.git
 ) else (
     git remote set-url origin https://github.com/huy22122/tiktok-streak-saver.git
 )
@@ -33,18 +33,16 @@ echo Dang day ma nguon len GitHub...
 echo (Neu co cua so trinh duyet bat len, hay bam "Sign in with your browser")
 echo.
 
-git push -u origin main
+git push -u origin main --force
 
 if errorlevel 1 (
     echo.
     echo ======================================================================
-    echo ❌ CHUA THE DAY LEN DUOC! NGUYEN NHAN PHO BIEN:
-    echo 1. Ban chua xac thuc tai khoan 'huy22122' tren trinh duyet.
-    echo 2. Hoac ban can tao mot Personal Access Token (PAT) tren GitHub:
-    echo    - Truy cap: https://github.com/settings/tokens/new
-    echo    - Dat ten token, tich chon quyen [x] repo
-    echo    - Bam "Generate token" roi copy ma token (co dang ghp_...)
-    echo    - Chay lai file nay va dan ma token vao!
+    echo ❌ CHUA DAY LEN DUOC!
+    echo Nguyen nhan thuong gap:
+    echo 1. Token cu da bi thay the khi ban sua quyen tren GitHub.
+    echo    - Hay vao https://github.com/settings/tokens copy lai chuoi token moi!
+    echo 2. Hoac ban chua bam "Sign in with your browser" khi cua so hien len.
     echo ======================================================================
 ) else (
     echo.
