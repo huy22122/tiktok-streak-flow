@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TikTok Streak Flow - Bảng Điều Khiển & Quản Lý Giữ Lửa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #090a0f;
+      --bg-surface: #12141a;
+      --bg-card: #171a22;
+      --bg-hover: #1e222d;
+      --border-subtle: #262a36;
+      --border-focus: #3d4458;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
+      --accent-primary: #fe2c55;
+      --accent-primary-hover: #e02449;
+      --accent-cyan: #25f4ee;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+      --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: var(--font-main);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Navigation Header */
+    header {
+      background: rgba(18, 20, 26, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 0.85rem 1.5rem;
+    }
+
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent-primary) 0%, #ff5277 100%);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 1.2rem;
+      box-shadow: 0 2px 8px rgba(254, 44, 85, 0.35);
+    }
+
+    .brand-text h1 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .brand-text p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .sync-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-card);
+    }
+
+    .sync-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--warning);
+      box-shadow: 0 0 8px var(--warning);
+    }
+
+    .sync-dot.connected {
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+    }
+
+    .sync-dot.error {
+      background: var(--danger);
+      box-shadow: 0 0 8px var(--danger);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      padding: 0.48rem 0.95rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      text-decoration: none;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: var(--accent-primary);
+      color: white;
+    }
+    .btn-primary:hover {
+      background: var(--accent-primary-hover);
+      box-shadow: 0 0 12px rgba(254, 44, 85, 0.4);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      border-color: var(--border-subtle);
+      color: var(--text-main);
+    }
+    .btn-secondary:hover {
+      background: var(--bg-hover);
+      border-color: var(--border-focus);
+    }
+
+    .btn-success {
+      background: #059669;
+      color: white;
+    }
+    .btn-success:hover {
+      background: #10b981;
+    }
+
+    .btn-sm {
+      padding: 0.3rem 0.65rem;
+      font-size: 0.75rem;
+    }
+
+    /* Main Container */
+    main {
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* Offline Alert Banner */
+    .offline-banner {
+      display: none;
+      background: #1c1917;
+      border: 1px solid #78350f;
+      border-radius: var(--radius-md);
+      padding: 0.85rem 1.25rem;
+      font-size: 0.84rem;
+      color: #fde68a;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .offline-banner.active {
+      display: flex;
+    }
+
+    /* Overview Stats Bar */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .stat-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .stat-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .stat-content .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .stat-content .stat-value {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-top: 0.15rem;
+    }
+
+    /* Main Grid Layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-header {
+      padding: 1.15rem 1.25rem;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .card-title {
+      font-size: 0.96rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-badge {
+      font-size: 0.72rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 9999px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .card-body {
+      padding: 1.25rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    /* Target Management Section */
+    .target-input-row {
+      display: flex;
+      gap: 0.6rem;
+    }
+
+    .input-text {
+      flex: 1;
+      background: var(--bg-base);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.55rem 0.85rem;
+      color: var(--text-main);
+      font-size: 0.86rem;
+      outline: none;
+      transition: border-color 0.15s ease;
+      font-family: inherit;
+    }
+
+    .input-text:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 2px rgba(254, 44, 85, 0.15);
+    }
+
+    .targets-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      max-height: 240px;
+      overflow-y: auto;
+      padding-right: 0.3rem;
+    }
+
+    .target-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      padding: 0.65rem 0.9rem;
+      border-radius: var(--radius-sm);
+      transition: all 0.15s ease;
+    }
+
+    .target-item:hover {
+      border-color: var(--border-focus);
+      background: var(--bg-hover);
+    }
+
+    .target-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .target-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #272a37;
+      color: #e5e7eb;
+      font-weight: 700;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .target-name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .target-type {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+
+    .btn-delete {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      padding: 0.35rem;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+
+    .btn-delete:hover {
+      color: var(--danger);
+      background: rgba(239, 68, 68, 0.12);
+    }
+
+    .empty-targets {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      border: 1px dashed var(--border-subtle);
+      border-radius: var(--radius-md);
+    }
+
+    /* Language Switcher Section */
+    .language-tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      background: var(--bg-base);
+      padding: 0.25rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      gap: 0.25rem;
+    }
+
+    .lang-tab {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.5rem 0.25rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      font-family: inherit;
+    }
+
+    .lang-tab:hover {
+      color: var(--text-main);
+    }
+
+    .lang-tab.active {
+      background: var(--bg-surface);
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Live Chat Preview */
+    .preview-box {
+      background: var(--bg-base);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    .chat-bubble-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      background: #0f1117;
+      border: 1px solid #1a1d26;
+      border-radius: var(--radius-md);
+      padding: 0.85rem;
+    }
+
+    .chat-msg-row {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .chat-bubble {
+      background: linear-gradient(135deg, #fe2c55 0%, #d81c43 100%);
+      color: white;
+      padding: 0.65rem 0.95rem;
+      border-radius: 14px 14px 2px 14px;
+      font-size: 0.84rem;
+      max-width: 85%;
+      box-shadow: 0 2px 8px rgba(254, 44, 85, 0.25);
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .custom-template-editor {
+      display: none;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .custom-template-editor.active {
+      display: flex;
+    }
+
+    .tags-helper {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .tag-chip {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .tag-chip:hover {
+      border-color: var(--accent-primary);
+      color: var(--text-main);
+    }
+
+    /* Schedule Section Styles */
+    .schedule-presets {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 0.5rem;
+    }
+
+    .preset-btn {
+      background: var(--bg-base);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 0.45rem 0.5rem;
+      font-size: 0.76rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+      text-align: center;
+    }
+
+    .preset-btn:hover {
+      border-color: var(--border-focus);
+      color: var(--text-main);
+    }
+
+    .preset-btn.active {
+      background: var(--bg-card);
+      border-color: var(--accent-primary);
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .time-chips-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .time-chip {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      padding: 0.35rem 0.65rem;
+      border-radius: 9999px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .time-chip-del {
+      cursor: pointer;
+      color: var(--text-dim);
+      font-weight: 400;
+      font-size: 0.85rem;
+      transition: color 0.15s ease;
+    }
+    .time-chip-del:hover {
+      color: var(--danger);
+    }
+
+    .delay-box {
+      background: var(--bg-base);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .select-input {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      padding: 0.45rem 0.75rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      outline: none;
+      font-family: inherit;
+    }
+
+    /* Terminal & Runner Section */
+    .terminal-container {
+      background: #060709;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: #94a3b8;
+      height: 200px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .log-line {
+      line-height: 1.4;
+    }
+    .log-info { color: #60a5fa; }
+    .log-success { color: #34d399; }
+    .log-warn { color: #fbbf24; }
+    .log-error { color: #f87171; }
+
+    /* GitHub Secrets Section */
+    .secret-box {
+      background: var(--bg-base);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .secret-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+    }
+
+    .secret-name {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: var(--accent-cyan);
+    }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #18181b;
+      border: 1px solid #3f3f46;
+      color: white;
+      padding: 0.75rem 1.25rem;
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      z-index: 100;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: all 0.25s ease;
+      pointer-events: none;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header>
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon">🔥</div>
+        <div class="brand-text">
+          <h1>TikTok Streak Flow <span style="font-size: 0.72rem; background: rgba(254,44,85,0.15); color: var(--accent-primary); padding: 2px 6px; border-radius: 4px; font-weight: 600;">PRO v3.2</span></h1>
+          <p>Trình quản lý & Tự động giữ lửa TikTok 24/7 (Không cố định giờ)</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div id="syncBadge" class="sync-status">
+          <div id="syncDot" class="sync-dot"></div>
+          <span id="syncText">Đang kiểm tra kết nối...</span>
+        </div>
+        <button id="btnRunNow" class="btn btn-primary btn-sm" onclick="runStreakTest()">
+          <span>▶️</span> Chạy Rep Chuỗi Ngay
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main View -->
+  <main>
+
+    <!-- Offline Warning Notice (if not opened via app_manager.py) -->
+    <div id="offlineBanner" class="offline-banner">
+      <div>
+        <strong>⚠️ Đang mở ở chế độ Ngoại tuyến (Offline Preview)</strong>
+        <p style="font-size: 0.76rem; color: #d6d3d1; margin-top: 2px;">
+          Để tự động đồng bộ thời gian và lưu thẳng vào file <code>.env</code> & <code>schedule.yml</code>, hãy mở bằng <strong>Mo_Trinh_Quan_Ly.bat</strong>!
+        </p>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="checkLocalServer()">Thử kết nối lại</button>
+    </div>
+
+    <!-- Stats KPI Bar -->
+    <section class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-icon">👤</div>
+        <div class="stat-content">
+          <div class="stat-label">Tài khoản TikTok</div>
+          <div id="statAccount" class="stat-value">Tài khoản của tôi</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-content">
+          <div class="stat-label">Mục tiêu giữ chuỗi</div>
+          <div id="statTargetCount" class="stat-value">0 mục tiêu</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">⏰</div>
+        <div class="stat-content">
+          <div class="stat-label">Khung giờ gửi</div>
+          <div id="statSchedule" class="stat-value">06:00</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">🎲</div>
+        <div class="stat-content">
+          <div class="stat-label">Độ trễ ngẫu nhiên</div>
+          <div id="statDelay" class="stat-value">~10 phút</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Two Columns Grid -->
+    <div class="dashboard-grid">
+
+      <!-- Left Column: Targets, Language & Time Schedule -->
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+        <!-- Card: Cài Đặt Khung Giờ & Độ Trễ Ngẫu Nhiên -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span>⏰</span> Khung Giờ Giữ Lửa & Chống Gửi Cố Định
+            </div>
+            <div class="card-badge" style="color: var(--accent-cyan);">Không bị cố định giờ</div>
+          </div>
+          <div class="card-body">
+            <div>
+              <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 0.4rem;">
+                Chọn chế độ giờ phổ biến hoặc tự thêm giờ theo ý bạn:
+              </label>
+              <div class="schedule-presets">
+                <button class="preset-btn active" id="preset_morning_6h" onclick="applyPreset(['06:00'], 'morning_6h')">
+                  🌅 06:00 Sáng Mỗi Ngày
+                </button>
+                <button class="preset-btn" id="preset_morning_night" onclick="applyPreset(['06:00', '20:30'], 'morning_night')">
+                  ⭐ 6h Sáng & 20h30 Tối
+                </button>
+                <button class="preset-btn" id="preset_triple" onclick="applyPreset(['06:00', '13:00', '21:00'], 'triple')">
+                  🔥 3 Lần/ngày (6h, 13h, 21h)
+                </button>
+              </div>
+            </div>
+
+            <!-- Custom Hours Selector -->
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 0.4rem;">
+                Các khung giờ đang thiết lập (Giờ Việt Nam):
+              </label>
+              <div id="timeChipsContainer" class="time-chips-container">
+                <!-- Render time chips here -->
+              </div>
+
+              <div style="display: flex; gap: 0.5rem; margin-top: 0.6rem;">
+                <input type="time" id="newTimePicker" class="input-text" style="max-width: 140px;" value="06:00">
+                <button class="btn btn-secondary btn-sm" onclick="addNewTime()">
+                  <span>+</span> Thêm giờ này
+                </button>
+              </div>
+            </div>
+
+            <!-- Random Delay Setting -->
+            <div class="delay-box">
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-main);">
+                  🎲 Độ trễ ngẫu nhiên (Random Delay):
+                </span>
+                <select id="selectDelay" class="select-input" onchange="updateRandomDelay(this.value)">
+                  <option value="0">Tắt (Gửi đúng giờ)</option>
+                  <option value="5">Trễ 1 ~ 5 phút</option>
+                  <option value="10" selected>Trễ 1 ~ 10 phút (Khuyên dùng)</option>
+                  <option value="15">Trễ 1 ~ 15 phút</option>
+                  <option value="25">Trễ 1 ~ 25 phút</option>
+                </select>
+              </div>
+              <p style="font-size: 0.74rem; color: var(--text-dim); line-height: 1.4;">
+                🛡️ <strong>Lợi ích:</strong> Bot sẽ tự động cộng ngẫu nhiên thêm vài phút trước khi gửi tin (ví dụ hẹn 06:00 thì hôm nay gửi lúc 06:02, mai gửi lúc 06:07...). Tránh việc ngày nào cũng gửi đúng từng giây cố định khiến TikTok nghi ngờ!
+              </p>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end;">
+              <button class="btn btn-success btn-sm" onclick="saveScheduleSettings()">
+                💾 Lưu Khung Giờ & Cập Nhật Lịch 24/7
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card: Danh Sách Giữ Chuỗi -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span>🎯</span> Danh Sách Bạn Bè & Nhóm Cần Giữ Lửa
+            </div>
+            <div class="card-badge" id="targetBadge">Đồng bộ với .env</div>
+          </div>
+          <div class="card-body">
+            <p style="font-size: 0.8rem; color: var(--text-muted);">
+              Nhập <strong>Tên hiển thị (Nickname)</strong> hoặc <strong>Tên nhóm chat TikTok</strong>. Tool sẽ tìm đúng cuộc trò chuyện để gửi tin giữ chuỗi.
+            </p>
+
+            <div class="target-input-row">
+              <input type="text" id="targetInput" class="input-text" placeholder="Ví dụ: Huy, mai phuong, 106267-K24..." onkeydown="if(event.key==='Enter') addTarget()">
+              <button class="btn btn-primary" onclick="addTarget()">
+                <span>+</span> Thêm Vào Tool
+              </button>
+            </div>
+
+            <div id="targetsContainer" class="targets-list">
+              <!-- Danh sách mục tiêu render động tại đây -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Card: Ngôn Ngữ & Mẫu Tin Nhắn -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span>💬</span> Ngôn Ngữ & Mẫu Tin Nhắn Giữ Lửa
+            </div>
+            <div class="card-badge">Tự động ngẫu nhiên</div>
+          </div>
+          <div class="card-body">
+            <div class="language-tabs">
+              <button class="lang-tab active" id="tab_vi" onclick="switchLanguage('vi')">🇻🇳 Tiếng Việt</button>
+              <button class="lang-tab" id="tab_en" onclick="switchLanguage('en')">🇬🇧 English</button>
+              <button class="lang-tab" id="tab_bilingual" onclick="switchLanguage('bilingual')">🌐 Song ngữ</button>
+              <button class="lang-tab" id="tab_custom" onclick="switchLanguage('custom')">✍️ Tùy chỉnh</button>
+            </div>
+
+            <!-- Chat Preview Bubble -->
+            <div class="preview-box">
+              <div class="preview-header">
+                <span>MÔ PHỎNG TIN NHẮN TIKTOK GỬI ĐI:</span>
+                <button class="btn btn-secondary btn-sm" onclick="randomizePreview()" style="padding: 2px 8px; font-size: 0.72rem;">
+                  🎲 Đổi câu khác
+                </button>
+              </div>
+
+              <div class="chat-bubble-container">
+                <div style="font-size: 0.72rem; color: var(--text-dim); display: flex; align-items: center; gap: 4px;">
+                  <span>Gửi tới:</span>
+                  <strong id="previewRecipient" style="color: var(--text-main);">Huy</strong>
+                </div>
+                <div class="chat-msg-row">
+                  <div class="chat-bubble" id="previewBubble">
+                    🔥 Duy trì chuỗi TikTok hôm nay nè! Chúc bạn ngày mới tốt lành ✨
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Custom Template Form (Hiển thị khi chọn Tùy chỉnh) -->
+            <div id="customTemplateEditor" class="custom-template-editor">
+              <label style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted);">
+                Soạn mẫu tin nhắn của bạn:
+              </label>
+              <input type="text" id="templateInput" class="input-text" placeholder="Lửa nè [TARGET] 🔥 Hôm nay [DATE] nhớ rep nha!">
+              <div class="tags-helper">
+                <span class="tag-chip" onclick="insertTag('[TARGET]')">+ [TARGET] (Tên bạn)</span>
+                <span class="tag-chip" onclick="insertTag('[RANDOM_MESSAGE]')">+ [RANDOM_MESSAGE] (Câu chúc)</span>
+                <span class="tag-chip" onclick="insertTag('[DATE]')">+ [DATE]</span>
+                <span class="tag-chip" onclick="insertTag('[TIME]')">+ [TIME]</span>
+                <span class="tag-chip" onclick="insertTag('[EMOJI]')">+ [EMOJI]</span>
+              </div>
+              <div style="display: flex; justify-content: flex-end; margin-top: 0.25rem;">
+                <button class="btn btn-success btn-sm" onclick="saveCustomTemplate()">
+                  💾 Lưu mẫu tin nhắn vào .env
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Runner, Cookie, GitHub Sync -->
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+        <!-- Card: Trình Điều Khiển Chạy Thử & Nhật Ký -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span>💻</span> Nhật Ký & Tiến Trình Rep Chuỗi
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="clearTerminal()">Xóa log</button>
+          </div>
+          <div class="card-body">
+            <div id="terminalBox" class="terminal-container">
+              <div class="log-line log-info">[HỆ THỐNG] Trình quản lý TikTok Streak Flow đã sẵn sàng.</div>
+              <div class="log-line log-info">[HỆ THỐNG] Bấm "Chạy Rep Chuỗi Ngay" để tiến hành rep hỏa hoạn.</div>
+            </div>
+
+            <div style="display: flex; gap: 0.6rem;">
+              <button id="btnRunSecondary" class="btn btn-primary" style="flex: 1;" onclick="runStreakTest()">
+                ▶️ Bắt Đầu Chạy Rep Chuỗi
+              </button>
+              <button class="btn btn-secondary" onclick="loginNewSession()" title="Mở Chrome đăng nhập TikTok để cập nhật Cookie">
+                🔑 Đăng Nhập Lại Cookie
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card: Đồng Bộ Lên GitHub 24/7 -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span>☁️</span> Chạy Miễn Phí 24/7 Trên GitHub
+            </div>
+            <div class="card-badge" id="workflowStatusBadge" style="background: rgba(16, 185, 129, 0.12); color: var(--success); border-color: rgba(16, 185, 129, 0.25);">
+              Auto Cron 06:00 Sáng
+            </div>
+          </div>
+          <div class="card-body">
+            <p style="font-size: 0.8rem; color: var(--text-muted);">
+              Khung giờ bạn chọn đã tự động chuyển sang giờ UTC trong file workflow. Bạn chỉ cần sao chép các giá trị dưới đây vào <strong>GitHub Repository Secrets</strong>:
+            </p>
+
+            <div class="secret-box">
+              <div class="secret-item">
+                <span class="secret-name">TASKS</span>
+                <button class="btn btn-secondary btn-sm" onclick="copySecret('TASKS')">📋 Sao chép</button>
+              </div>
+              <div class="secret-item">
+                <span class="secret-name">COOKIES_ACC1</span>
+                <button class="btn btn-secondary btn-sm" onclick="copySecret('COOKIES')">📋 Sao chép</button>
+              </div>
+              <div class="secret-item">
+                <span class="secret-name">STREAK_LANGUAGE</span>
+                <button class="btn btn-secondary btn-sm" onclick="copySecret('LANG')">📋 Sao chép</button>
+              </div>
+              <div class="secret-item">
+                <span class="secret-name">RANDOM_DELAY_MINUTES</span>
+                <button class="btn btn-secondary btn-sm" onclick="copySecret('DELAY')">📋 Sao chép</button>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.35rem;">
+              <a href="https://github.com/huy22122/tiktok-streak-saver/settings/secrets/actions" target="_blank" class="btn btn-secondary btn-sm" style="flex: 1;">
+                🌐 Mở Trang GitHub Secrets Của Bạn
+              </a>
+              <button class="btn btn-secondary btn-sm" onclick="downloadEnvBackup()" style="flex: 1;">
+                📥 Tải File .env
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toast">Thông báo</div>
+
+  <script>
+    let state = {
+      isLocalConnected: false,
+      targets: ["Huy", "106267-K24"],
+      language: "vi",
+      template: "[RANDOM_MESSAGE]",
+      scheduleTimes: ["06:00"],
+      randomDelayMinutes: 10,
+      accountName: "Tài khoản của tôi",
+      cookieCount: 76,
+      rawConfig: null,
+      sampleIndex: 0,
+    };
+
+    const SAMPLES = {
+      vi: [
+        "🔥 Duy trì chuỗi TikTok hôm nay nè! Chúc bạn ngày mới tốt lành ✨",
+        "🔥 Tiếp tục chuỗi hỏa hoạn TikTok nha! Ngày mới tràn đầy năng lượng nhé 💪",
+        "🔥 Rep chuỗi TikTok hôm nay nào! Chúc bạn một ngày thật may mắn 🍀",
+        "🔥 Giữ chuỗi TikTok thôi nào! Have a wonderful day 🌟",
+        "🔥 Ting ting! Điểm danh chuỗi TikTok ngày hôm nay 🚀",
+        "🔥 Giữ lửa TikTok không để tắt nè bạn ơi! Chúc ngày mới vui vẻ 🎉",
+      ],
+      en: [
+        "🔥 Keeping our TikTok streak alive! Have an amazing day ✨",
+        "🔥 Streak check! Hope you have a wonderful day ahead 🚀",
+        "🔥 Daily TikTok streak reminder! Stay awesome and blessed 🍀",
+        "🔥 Keeping the fire burning on TikTok! Have a great one 🎉",
+        "🔥 Don't let our streak end! Wishing you the best today 💖",
+      ],
+      bilingual: [
+        "🔥 Giữ chuỗi TikTok hôm nay nha! • Keeping our streak alive ✨",
+        "🔥 Điểm danh chuỗi TikTok nè! • Have a wonderful day 🌟",
+        "🔥 Rep chuỗi giữ lửa TikTok! • Wishing you all the best today 🍀",
+        "🔥 Tiếp tục chuỗi ngày rực rỡ nhé! • Stay awesome and blessed 💖",
+      ],
+      custom: [
+        "🔥 Lửa nè bạn ơi! Nhớ rep giữ chuỗi hôm nay nha ✨",
+      ]
+    };
+
+    async function checkLocalServer() {
+      const ports = [7860, 7861, 7862, 5000];
+      let connected = false;
+
+      if (window.location.protocol.startsWith("http")) {
+        try {
+          const res = await fetch("/api/config", { cache: "no-store" });
+          if (res.ok) {
+            const data = await res.json();
+            applyConfig(data);
+            setConnected(true, window.location.origin);
+            return;
+          }
+        } catch (e) {}
+      }
+
+      for (const p of ports) {
+        try {
+          const url = `http://127.0.0.1:${p}/api/config`;
+          const res = await fetch(url, { cache: "no-store", mode: "cors" });
+          if (res.ok) {
+            const data = await res.json();
+            applyConfig(data);
+            setConnected(true, `http://127.0.0.1:${p}`);
+            connected = true;
+            break;
+          }
+        } catch (e) {}
+      }
+
+      if (!connected) {
+        setConnected(false);
+      }
+    }
+
+    function setConnected(isConnected, hostUrl = "") {
+      state.isLocalConnected = isConnected;
+      const dot = document.getElementById("syncDot");
+      const text = document.getElementById("syncText");
+      const banner = document.getElementById("offlineBanner");
+
+      if (isConnected) {
+        dot.className = "sync-dot connected";
+        text.innerText = "Đã kết nối trực tiếp với .env";
+        text.title = `Local Server API: ${hostUrl}`;
+        banner.classList.remove("active");
+      } else {
+        dot.className = "sync-dot";
+        text.innerText = "Chế độ Ngoại tuyến";
+        banner.classList.add("active");
+      }
+    }
+
+    function applyConfig(data) {
+      state.rawConfig = data;
+      if (data.account) {
+        state.accountName = data.account.username || "Tài khoản của tôi";
+        state.targets = data.account.targets || [];
+        state.cookieCount = data.account.cookie_count || 0;
+      }
+      if (data.streak_language) {
+        state.language = data.streak_language;
+      }
+      if (data.message_template) {
+        state.template = data.message_template;
+        document.getElementById("templateInput").value = data.message_template;
+      }
+      if (data.schedule_times && data.schedule_times.length > 0) {
+        state.scheduleTimes = data.schedule_times;
+      }
+      if (typeof data.random_delay_minutes !== "undefined") {
+        state.randomDelayMinutes = data.random_delay_minutes;
+        document.getElementById("selectDelay").value = String(data.random_delay_minutes);
+      }
+
+      renderAll();
+    }
+
+    function renderAll() {
+      // Stats
+      document.getElementById("statAccount").innerText = state.accountName;
+      document.getElementById("statTargetCount").innerText = `${state.targets.length} mục tiêu`;
+      document.getElementById("statSchedule").innerText = state.scheduleTimes.join(", ") || "Chưa đặt";
+      document.getElementById("statDelay").innerText = state.randomDelayMinutes > 0 
+        ? `~${state.randomDelayMinutes} phút` 
+        : "Đúng giờ (0m)";
+
+      // Render Targets
+      const container = document.getElementById("targetsContainer");
+      container.innerHTML = "";
+
+      if (state.targets.length === 0) {
+        container.innerHTML = `
+          <div class="empty-targets">
+            Chưa có mục tiêu nào trong danh sách.<br>
+            Tool sẽ <strong>tự động rep tất cả các hộp thoại có tin nhắn mới</strong> hoặc bạn có thể thêm bạn bè/nhóm ở trên!
+          </div>
+        `;
+      } else {
+        state.targets.forEach((target, index) => {
+          const initial = target.trim().charAt(0).toUpperCase() || "T";
+          const isGroup = target.includes("-") || target.toLowerCase().includes("nhóm") || target.length > 12;
+          const typeLabel = isGroup ? "Nhóm chat" : "Bạn bè";
+
+          const item = document.createElement("div");
+          item.className = "target-item";
+          item.innerHTML = `
+            <div class="target-info">
+              <div class="target-avatar">${initial}</div>
+              <div>
+                <div class="target-name">${escapeHtml(target)}</div>
+                <div class="target-type">${typeLabel}</div>
+              </div>
+            </div>
+            <button class="btn-delete" onclick="deleteTarget('${escapeJs(target)}')" title="Xóa khỏi danh sách">
+              ✕
+            </button>
+          `;
+          container.appendChild(item);
+        });
+      }
+
+      // Render Schedule Time Chips
+      renderScheduleChips();
+
+      // Language Tab Highlight
+      document.querySelectorAll(".lang-tab").forEach(tab => tab.classList.remove("active"));
+      const activeTab = document.getElementById(`tab_${state.language}`);
+      if (activeTab) activeTab.classList.add("active");
+
+      // Custom template editor toggle
+      const customEditor = document.getElementById("customTemplateEditor");
+      if (state.language === "custom") {
+        customEditor.classList.add("active");
+      } else {
+        customEditor.classList.remove("active");
+      }
+
+      randomizePreview();
+    }
+
+    function renderScheduleChips() {
+      const chipContainer = document.getElementById("timeChipsContainer");
+      chipContainer.innerHTML = "";
+
+      if (state.scheduleTimes.length === 0) {
+        chipContainer.innerHTML = `<span style="font-size: 0.78rem; color: var(--text-dim);">Chưa có khung giờ nào được chọn.</span>`;
+        return;
+      }
+
+      state.scheduleTimes.forEach(t => {
+        const chip = document.createElement("div");
+        chip.className = "time-chip";
+        chip.innerHTML = `
+          <span>${t}</span>
+          <span class="time-chip-del" onclick="removeTime('${t}')" title="Xóa giờ này">✕</span>
+        `;
+        chipContainer.appendChild(chip);
+      });
+    }
+
+    function applyPreset(times, presetId) {
+      document.querySelectorAll(".preset-btn").forEach(b => b.classList.remove("active"));
+      const btn = document.getElementById(`preset_${presetId}`);
+      if (btn) btn.classList.add("active");
+
+      state.scheduleTimes = [...times];
+      renderScheduleChips();
+      document.getElementById("statSchedule").innerText = state.scheduleTimes.join(", ");
+      saveScheduleSettings();
+    }
+
+    function addNewTime() {
+      const picker = document.getElementById("newTimePicker");
+      const val = picker.value;
+      if (!val) return;
+
+      if (!state.scheduleTimes.includes(val)) {
+        state.scheduleTimes.push(val);
+        state.scheduleTimes.sort();
+        renderScheduleChips();
+        document.getElementById("statSchedule").innerText = state.scheduleTimes.join(", ");
+        document.querySelectorAll(".preset-btn").forEach(b => b.classList.remove("active"));
+        saveScheduleSettings();
+      } else {
+        showToast(`Khung giờ ${val} đã có trong danh sách!`, "warning");
+      }
+    }
+
+    function removeTime(t) {
+      state.scheduleTimes = state.scheduleTimes.filter(x => x !== t);
+      renderScheduleChips();
+      document.getElementById("statSchedule").innerText = state.scheduleTimes.join(", ") || "Chưa đặt";
+      document.querySelectorAll(".preset-btn").forEach(b => b.classList.remove("active"));
+      saveScheduleSettings();
+    }
+
+    function updateRandomDelay(val) {
+      state.randomDelayMinutes = parseInt(val, 10);
+      document.getElementById("statDelay").innerText = state.randomDelayMinutes > 0 
+        ? `~${state.randomDelayMinutes} phút` 
+        : "Đúng giờ (0m)";
+      saveScheduleSettings();
+    }
+
+    async function saveScheduleSettings() {
+      if (state.isLocalConnected) {
+        try {
+          const res = await fetch("/api/schedule", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              times: state.scheduleTimes,
+              random_delay_minutes: state.randomDelayMinutes
+            })
+          });
+          const data = await res.json();
+          if (data.success) {
+            showToast(`✅ Đã lưu lịch [${state.scheduleTimes.join(", ")}] vào .env & GitHub Actions!`);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      } else {
+        showToast(`Đã ghi nhận khung giờ [${state.scheduleTimes.join(", ")}] vào bộ nhớ.`);
+      }
+    }
+
+    // Thêm mục tiêu
+    async function addTarget() {
+      const input = document.getElementById("targetInput");
+      const val = input.value.trim();
+      if (!val) {
+        showToast("Vui lòng nhập tên bạn bè hoặc nhóm!", "warning");
+        return;
+      }
+
+      if (state.targets.includes(val)) {
+        showToast(`Mục tiêu "${val}" đã có trong danh sách!`, "warning");
+        return;
+      }
+
+      input.value = "";
+
+      if (state.isLocalConnected) {
+        try {
+          const res = await fetch("/api/target/add", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ target: val })
+          });
+          const data = await res.json();
+          if (data.success) {
+            state.targets = data.targets;
+            renderAll();
+            showToast(`✅ Đã thêm "${val}" và đồng bộ trực tiếp vào file .env!`);
+            return;
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      state.targets.push(val);
+      renderAll();
+      showToast(`Đã thêm "${val}" vào danh sách tạm thời.`);
+    }
+
+    // Xóa mục tiêu
+    async function deleteTarget(targetName) {
+      if (state.isLocalConnected) {
+        try {
+          const res = await fetch("/api/target/delete", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ target: targetName })
+          });
+          const data = await res.json();
+          if (data.success) {
+            state.targets = data.targets;
+            renderAll();
+            showToast(`🗑️ Đã xóa "${targetName}" khỏi file .env!`);
+            return;
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      state.targets = state.targets.filter(t => t !== targetName);
+      renderAll();
+      showToast(`Đã xóa "${targetName}".`);
+    }
+
+    // Đổi ngôn ngữ
+    async function switchLanguage(lang) {
+      state.language = lang;
+      renderAll();
+
+      if (state.isLocalConnected) {
+        try {
+          await fetch("/api/language", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ language: lang })
+          });
+          showToast(`✅ Đã đổi sang ${lang.toUpperCase()} và lưu vào .env!`);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+
+    function randomizePreview() {
+      const recipient = state.targets[0] || "Bạn của bạn";
+      document.getElementById("previewRecipient").innerText = recipient;
+
+      let list = SAMPLES[state.language] || SAMPLES.vi;
+      if (state.language === "custom") {
+        const tmpl = state.template || "[RANDOM_MESSAGE]";
+        let text = tmpl
+          .replace(/\[TARGET\]/g, recipient)
+          .replace(/\[RANDOM_MESSAGE\]/g, "Chúc ngày mới rực rỡ ✨")
+          .replace(/\[DATE\]/g, new Date().toLocaleDateString("vi-VN"))
+          .replace(/\[TIME\]/g, new Date().toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' }))
+          .replace(/\[EMOJI\]/g, "🔥");
+        document.getElementById("previewBubble").innerText = text;
+        return;
+      }
+
+      state.sampleIndex = (state.sampleIndex + 1) % list.length;
+      document.getElementById("previewBubble").innerText = list[state.sampleIndex];
+    }
+
+    function insertTag(tag) {
+      const input = document.getElementById("templateInput");
+      const cur = input.value;
+      input.value = cur + (cur.endsWith(" ") || cur === "" ? "" : " ") + tag + " ";
+      input.focus();
+    }
+
+    async function saveCustomTemplate() {
+      const val = document.getElementById("templateInput").value.trim() || "[RANDOM_MESSAGE]";
+      state.template = val;
+      randomizePreview();
+
+      if (state.isLocalConnected) {
+        try {
+          await fetch("/api/template", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ template: val })
+          });
+          showToast("✅ Đã lưu mẫu tin nhắn tùy chỉnh vào file .env!");
+        } catch (e) {
+          showToast("Lỗi lưu template: " + e, "error");
+        }
+      } else {
+        showToast("Đã lưu mẫu tin nhắn vào bộ nhớ tạm.");
+      }
+    }
+
+    let pollInterval = null;
+    async function runStreakTest() {
+      const btn = document.getElementById("btnRunNow");
+      const btn2 = document.getElementById("btnRunSecondary");
+
+      if (!state.isLocalConnected) {
+        appendLog("[HỆ THỐNG] Đang ở chế độ ngoại tuyến. Vui lòng mở bằng file Mo_Trinh_Quan_Ly.bat để chạy tool!");
+        showToast("Vui lòng mở Mo_Trinh_Quan_Ly.bat để chạy trực tiếp!", "warning");
+        return;
+      }
+
+      btn.disabled = true;
+      btn2.disabled = true;
+      btn.innerText = "⏳ Đang chạy...";
+      btn2.innerText = "⏳ Đang xử lý rep chuỗi...";
+
+      appendLog("--------------------------------------------------");
+      appendLog(`[${new Date().toLocaleTimeString()}] 🚀 BẮT ĐẦU TIẾN TRÌNH REP CHUỖI TIKTOK...`);
+      appendLog(`[MỤC TIÊU]: ${state.targets.join(", ") || "Tất cả hộp thư"}`);
+      appendLog(`[NGÔN NGỮ]: ${state.language.toUpperCase()}`);
+      appendLog("--------------------------------------------------");
+
+      try {
+        const res = await fetch("/api/run", { method: "POST" });
+        const data = await res.json();
+        if (!data.success) {
+          appendLog(`[LỖI] ${data.message}`);
+          btn.disabled = false;
+          btn2.disabled = false;
+          btn.innerText = "▶️ Chạy Rep Chuỗi Ngay";
+          btn2.innerText = "▶️ Bắt Đầu Chạy Rep Chuỗi";
+          return;
+        }
+
+        if (pollInterval) clearInterval(pollInterval);
+        pollInterval = setInterval(pollRunStatus, 1200);
+
+      } catch (e) {
+        appendLog(`[LỖI GỌI API] ${e}`);
+        btn.disabled = false;
+        btn2.disabled = false;
+      }
+    }
+
+    async function pollRunStatus() {
+      try {
+        const res = await fetch("/api/run-status");
+        if (!res.ok) return;
+        const data = await res.json();
+        
+        if (data.logs && data.logs.length > 0) {
+          renderLogs(data.logs);
+        }
+
+        if (data.status === "completed" || data.status === "error") {
+          clearInterval(pollInterval);
+          pollInterval = null;
+          const btn = document.getElementById("btnRunNow");
+          const btn2 = document.getElementById("btnRunSecondary");
+          btn.disabled = false;
+          btn2.disabled = false;
+          btn.innerText = "▶️ Chạy Rep Chuỗi Ngay";
+          btn2.innerText = "▶️ Bắt Đầu Chạy Rep Chuỗi";
+
+          if (data.status === "completed") {
+            showToast("🎉 Rep chuỗi TikTok hoàn tất thành công!");
+          } else {
+            showToast("❌ Quá trình chạy xảy ra lỗi, vui lòng xem terminal.", "error");
+          }
+        }
+      } catch (e) {}
+    }
+
+    function renderLogs(logs) {
+      const box = document.getElementById("terminalBox");
+      box.innerHTML = "";
+      logs.forEach(l => {
+        const div = document.createElement("div");
+        div.className = "log-line";
+        if (l.includes("SUCCESS") || l.includes("✅") || l.includes("thành công")) div.className += " log-success";
+        else if (l.includes("ERROR") || l.includes("❌") || l.includes("Lỗi")) div.className += " log-error";
+        else if (l.includes("WARNING") || l.includes("⚠️")) div.className += " log-warn";
+        else div.className += " log-info";
+        div.innerText = l;
+        box.appendChild(div);
+      });
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function appendLog(line) {
+      const box = document.getElementById("terminalBox");
+      const div = document.createElement("div");
+      div.className = "log-line log-info";
+      div.innerText = line;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function clearTerminal() {
+      document.getElementById("terminalBox").innerHTML = `
+        <div class="log-line log-info">[HỆ THỐNG] Nhật ký đã được làm sạch.</div>
+      `;
+    }
+
+    async function loginNewSession() {
+      if (!state.isLocalConnected) {
+        showToast("Hãy mở qua Mo_Trinh_Quan_Ly.bat để sử dụng tính năng này!", "warning");
+        return;
+      }
+      try {
+        const res = await fetch("/api/login-browser", { method: "POST" });
+        const data = await res.json();
+        showToast(data.message);
+      } catch (e) {
+        showToast("Lỗi mở đăng nhập: " + e, "error");
+      }
+    }
+
+    function copySecret(type) {
+      let textToCopy = "";
+      if (type === "TASKS") {
+        const tasksObj = [
+          {
+            username: state.accountName || "Tài khoản của tôi",
+            unique_id: "acc1",
+            targets: state.targets
+          }
+        ];
+        textToCopy = JSON.stringify(tasksObj);
+      } else if (type === "COOKIES") {
+        textToCopy = (state.rawConfig && state.rawConfig.cookies_json) || "[]";
+      } else if (type === "LANG") {
+        textToCopy = state.language;
+      } else if (type === "DELAY") {
+        textToCopy = String(state.randomDelayMinutes);
+      }
+
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        showToast(`✅ Đã sao chép giá trị bí mật ${type}!`);
+      }).catch(() => {
+        showToast("Không thể sao chép tự động, vui lòng thử lại.", "error");
+      });
+    }
+
+    function downloadEnvBackup() {
+      const tasksStr = JSON.stringify([{
+        username: state.accountName,
+        unique_id: "acc1",
+        targets: state.targets
+      }]);
+      const cookiesStr = (state.rawConfig && state.rawConfig.cookies_json) || "[]";
+
+      const content = 
+`# Cấu hình TikTok Streak Flow
+TASKS=${tasksStr}
+COOKIES_ACC1=${cookiesStr}
+STREAK_LANGUAGE=${state.language}
+MESSAGE_TEMPLATE=${state.template}
+SCHEDULE_TIMES=${state.scheduleTimes.join(",")}
+RANDOM_DELAY_MINUTES=${state.randomDelayMinutes}
+LOG_LEVEL=DEBUG
+BROWSER_TIMEOUT=120000
+TASK_RETRY_TIMES=3
+`;
+      const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = ".env";
+      a.click();
+      showToast("📥 Đã tải file .env về máy!");
+    }
+
+    function showToast(msg, type = "success") {
+      const toast = document.getElementById("toast");
+      toast.innerText = msg;
+      if (type === "warning") toast.style.borderColor = "var(--warning)";
+      else if (type === "error") toast.style.borderColor = "var(--danger)";
+      else toast.style.borderColor = "var(--success)";
+
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 3200);
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+
+    function escapeJs(str) {
+      return str.replace(/'/g, "\\'");
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      renderAll();
+      checkLocalServer();
+    });
+  </script>
+</body>
+</html>
