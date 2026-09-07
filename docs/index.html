@@ -766,7 +766,7 @@
         <div class="stat-icon">⏰</div>
         <div class="stat-content">
           <div class="stat-label">Khung giờ gửi</div>
-          <div id="statSchedule" class="stat-value">08:30, 20:30</div>
+          <div id="statSchedule" class="stat-value">06:00</div>
         </div>
       </div>
 
@@ -799,14 +799,14 @@
                 Chọn chế độ giờ phổ biến hoặc tự thêm giờ theo ý bạn:
               </label>
               <div class="schedule-presets">
-                <button class="preset-btn active" id="preset_morning_night" onclick="applyPreset(['08:30', '20:30'], 'morning_night')">
-                  ⭐ Sáng & Tối (08:30, 20:30)
+                <button class="preset-btn active" id="preset_morning_6h" onclick="applyPreset(['06:00'], 'morning_6h')">
+                  🌅 06:00 Sáng Mỗi Ngày
                 </button>
-                <button class="preset-btn" id="preset_night_only" onclick="applyPreset(['20:30'], 'night_only')">
-                  🌙 1 Lần mỗi tối (20:30)
+                <button class="preset-btn" id="preset_morning_night" onclick="applyPreset(['06:00', '20:30'], 'morning_night')">
+                  ⭐ 6h Sáng & 20h30 Tối
                 </button>
-                <button class="preset-btn" id="preset_triple" onclick="applyPreset(['08:00', '14:00', '21:00'], 'triple')">
-                  🔥 3 Lần/ngày (8h, 14h, 21h)
+                <button class="preset-btn" id="preset_triple" onclick="applyPreset(['06:00', '13:00', '21:00'], 'triple')">
+                  🔥 3 Lần/ngày (6h, 13h, 21h)
                 </button>
               </div>
             </div>
@@ -821,7 +821,7 @@
               </div>
 
               <div style="display: flex; gap: 0.5rem; margin-top: 0.6rem;">
-                <input type="time" id="newTimePicker" class="input-text" style="max-width: 140px;" value="12:00">
+                <input type="time" id="newTimePicker" class="input-text" style="max-width: 140px;" value="06:00">
                 <button class="btn btn-secondary btn-sm" onclick="addNewTime()">
                   <span>+</span> Thêm giờ này
                 </button>
@@ -843,7 +843,7 @@
                 </select>
               </div>
               <p style="font-size: 0.74rem; color: var(--text-dim); line-height: 1.4;">
-                🛡️ <strong>Lợi ích:</strong> Bot sẽ tự động cộng ngẫu nhiên thêm vài phút trước khi gửi tin (ví dụ hẹn 20:30 thì hôm nay gửi lúc 20:32, mai gửi lúc 20:38...). Tránh việc ngày nào cũng gửi đúng từng giây cố định khiến TikTok nghi ngờ!
+                🛡️ <strong>Lợi ích:</strong> Bot sẽ tự động cộng ngẫu nhiên thêm vài phút trước khi gửi tin (ví dụ hẹn 06:00 thì hôm nay gửi lúc 06:02, mai gửi lúc 06:07...). Tránh việc ngày nào cũng gửi đúng từng giây cố định khiến TikTok nghi ngờ!
               </p>
             </div>
 
@@ -979,12 +979,12 @@
               <span>☁️</span> Chạy Miễn Phí 24/7 Trên GitHub
             </div>
             <div class="card-badge" id="workflowStatusBadge" style="background: rgba(16, 185, 129, 0.12); color: var(--success); border-color: rgba(16, 185, 129, 0.25);">
-              Auto Cron Sync
+              Auto Cron 06:00 Sáng
             </div>
           </div>
           <div class="card-body">
             <p style="font-size: 0.8rem; color: var(--text-muted);">
-              Khung giờ bạn chọn sẽ được tự động đổi sang giờ UTC và áp dụng trực tiếp vào GitHub Actions. Bạn chỉ cần sao chép các giá trị dưới đây vào <strong>GitHub Repository Secrets</strong>:
+              Khung giờ bạn chọn đã tự động chuyển sang giờ UTC trong file workflow. Bạn chỉ cần sao chép các giá trị dưới đây vào <strong>GitHub Repository Secrets</strong>:
             </p>
 
             <div class="secret-box">
@@ -1007,8 +1007,8 @@
             </div>
 
             <div style="display: flex; gap: 0.5rem; margin-top: 0.35rem;">
-              <a href="https://github.com" target="_blank" class="btn btn-secondary btn-sm" style="flex: 1;">
-                🌐 Mở GitHub Secrets
+              <a href="https://github.com/huy22122/tiktok-streak-saver/settings/secrets/actions" target="_blank" class="btn btn-secondary btn-sm" style="flex: 1;">
+                🌐 Mở Trang GitHub Secrets Của Bạn
               </a>
               <button class="btn btn-secondary btn-sm" onclick="downloadEnvBackup()" style="flex: 1;">
                 📥 Tải File .env
@@ -1031,7 +1031,7 @@
       targets: ["Huy", "106267-K24"],
       language: "vi",
       template: "[RANDOM_MESSAGE]",
-      scheduleTimes: ["08:30", "20:30"],
+      scheduleTimes: ["06:00"],
       randomDelayMinutes: 10,
       accountName: "Tài khoản của tôi",
       cookieCount: 76,
