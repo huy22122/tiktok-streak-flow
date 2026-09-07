@@ -1,0 +1,219 @@
+import os, sys
+from enum import Enum
+import json
+import logging
+from utils.logger import setup_logger
+from utils import norm
+
+logger = setup_logger(level=logging.DEBUG)
+
+"""
+是否启用调试模式
+更详细的日志打印，浏览器操作可视化等
+"""
+DEBUG = True
+config = None
+userData = None
+
+
+class Environment(Enum):
+    GITHUBACTION = "GITHUB_ACTION"  # GitHub Action 运行
+    LOCAL = "LOCAL"  # 本地代码运行
+    PACKED = "PACKED"  # PyInstaller 打包运行
+
+    def __str__(self):
+        return self.value
+
+
+def get_environment():
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        return Environment.PACKED
+    elif os.getenv("GITHUB_ACTIONS") == "true":
+        return Environment.GITHUBACTION
+    else:
+        return Environment.LOCAL
+
+
+def get_config():
+    """
+    Lấy thông tin cấu hình từ biến môi trường
+    :return: dict cấu hình
+    """
+    global config
+
+    if config:
+        return config
+
+    config = {
+        "proxyAddress": os.getenv("PROXY_ADDRESS", ""),
+        "streakLanguage": os.getenv("STREAK_LANGUAGE", "vi"), # Ngôn ngữ giữ chuỗi (vi / en / bilingual)
+        "messageTemplate": os.getenv(
+            "MESSAGE_TEMPLATE",
+            "[RANDOM_MESSAGE]",
+        ),
+        "hitokotoTypes": json.loads(
+            os.getenv("HITOKOTO_TYPES", '["文学","影视","诗词","哲学"]')
+        ),
+        "browserTimeout": int(
+            os.getenv("BROWSER_TIMEOUT", "120000")
+        ),  # Thời gian chờ thao tác trình duyệt (ms)
+        "friendListTimeout": int(
+            os.getenv("FRIEND_LIST_WAIT_TIME", "3000")
+        ),  # Thời gian chờ tải danh sách bạn bè (ms)
+        "taskRetryTimes": int(os.getenv("TASK_RETRY_TIMES", "3")),  # Số lần thử lại
+        "logLevel": os.getenv("LOG_LEVEL", "DEBUG"),  # Cấp độ log
+    }
+
+    return config
+
+
+def sanitize_cookies(cookies):
+    """
+    Làm sạch danh sách Cookie để tương thích hoàn toàn với Playwright và Chrome DevTools Protocol.
+    Loại bỏ các cookie rác (Google, YouTube OAuth), chuẩn hóa domain và trường expires.
+    """
+    cleaned_cookies = []
+    allowed_keys = {"name", "value", "url", "domain", "path", "expires", "httpOnly", "secure", "sameSite"}
+
+    for c in cookies:
+        if not isinstance(c, dict):
+            continue
+
+        name = str(c.get("name", "")).strip()
+        value = str(c.get("value", ""))
+        domain = str(c.get("domain", "")).strip().lower()
+
+        if not name or not value:
+            continue
+
+        # Chỉ giữ lại các cookie thuộc tên miền TikTok
+        if "tiktok.com" not in domain and not domain.endswith("tiktok.com"):
+            continue
+
+        # Cookie có tiền tố __Host- không được phép chứa thuộc tính domain
+        if name.startswith("__Host-"):
+            continue
+
+        cookie = {
+            "name": name,
+            "value": value,
+            "domain": ".tiktok.com",
+            "path": "/",
+        }
+
+        # Xử lý expires: phải là số nguyên dương (timestamp), bỏ qua nếu <= 0
+        expires = c.get("expires")
+        if expires is not None:
+            try:
+                exp_int = int(float(expires))
+                if exp_int > 0:
+                    cookie["expires"] = exp_int
+            except (ValueError, TypeError):
+                pass
+
+        if "httpOnly" in c and isinstance(c["httpOnly"], bool):
+            cookie["httpOnly"] = c["httpOnly"]
+
+        if "secure" in c and isinstance(c["secure"], bool):
+            cookie["secure"] = c["secure"]
+
+        # Xử lý sameSite chuẩn: "Strict", "Lax", "None"
+        same_site = c.get("sameSite")
+        if same_site:
+            same_site_str = str(same_site).capitalize()
+            if same_site_str in ["Strict", "Lax", "None"]:
+                cookie["sameSite"] = same_site_str
+                if same_site_str == "None":
+                    cookie["secure"] = True
+
+        cleaned_cookies.append(cookie)
+
+    return cleaned_cookies
+
+
+def get_userData():
+    """
+    Lấy dữ liệu danh sách tài khoản và bạn bè cần giữ chuỗi
+    :return: danh sách user data
+    """
+    global userData
+
+    if userData:
+        return userData
+
+    tasks_raw = os.getenv("TASKS", "[]").strip()
+    if (tasks_raw.startswith("'") and tasks_raw.endswith("'")) or (tasks_raw.startswith('"') and tasks_raw.endswith('"')):
+        tasks_raw = tasks_raw[1:-1].strip()
+
+    try:
+        tasks = json.loads(tasks_raw)
+    except json.JSONDecodeError:
+        try:
+            tasks = json.loads(tasks_raw.replace(r'\"', '"'))
+        except Exception:
+            logger.error("Biến môi trường TASKS không đúng định dạng JSON!")
+            tasks = []
+
+    userData = []
+
+    for task in tasks:
+        username = task.get("username", "Tài khoản TikTok")
+        unique_id = task.get("unique_id")
+        if not unique_id:
+            logger.warning(f"Tài khoản '{username}' thiếu trường unique_id, đã bỏ qua.")
+            continue
+
+        # Tìm cookies trong biến môi trường với các biến thể hoa/thường
+        keys_to_try = [
+            f"COOKIES_{unique_id}".upper(),
+            f"COOKIES_{unique_id}".lower(),
+            f"COOKIES_{unique_id}",
+            f"COOKIES_{unique_id.replace('-', '_')}".upper(),
+            f"COOKIES_{unique_id.replace('-', '_')}",
+        ]
+
+        cookies_str = ""
+        matched_key = ""
+        for k in keys_to_try:
+            val = os.getenv(k, "")
+            if val:
+                cookies_str = val
+                matched_key = k
+                break
+
+        if not cookies_str:
+            logger.warning(
+                f"Tài khoản '{username}' ({unique_id}) thiếu biến môi trường cookies ({keys_to_try[0]}), đã bỏ qua."
+            )
+            continue
+
+        try:
+            # Thử decode nếu có ký tự thoát
+            if "\\" in cookies_str:
+                try:
+                    cookies_str = cookies_str.encode("utf-8").decode("unicode_escape")
+                except Exception:
+                    pass
+            cookies = json.loads(cookies_str)
+        except json.JSONDecodeError as e:
+            logger.warning(f"Cookie của tài khoản '{username}' ({matched_key}) không đúng định dạng JSON: {e}")
+            continue
+
+        raw_targets = task.get("targets", [])
+        # Chuẩn hóa danh sách mục tiêu bạn bè
+        targets = []
+        for t in raw_targets:
+            t_str = norm(str(t))
+            if t_str:
+                targets.append(t_str)
+
+        userData.append(
+            {
+                "unique_id": unique_id,
+                "username": username,
+                "cookies": sanitize_cookies(cookies),
+                "targets": targets,
+            }
+        )
+
+    return userData

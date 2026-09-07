@@ -1,0 +1,64 @@
+name: TikTok Streak Flow Schedule Run
+
+on:
+  workflow_dispatch: # Cho phép nhấn nút chạy thủ công bất cứ lúc nào
+  schedule:
+    - cron: "0 23 * * *"  # 06:00 VN (UTC+7)
+jobs:
+  run-main:
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout mã nguồn
+        uses: actions/checkout@v4
+
+      - name: Cài đặt Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Kiểm tra kết nối tới TikTok
+        run: |
+          curl -I https://www.tiktok.com/ || echo "TikTok connection check completed"
+
+      - name: Cài đặt các thư viện phụ thuộc
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Cài đặt trình duyệt Playwright Chromium
+        run: |
+          playwright install chromium --with-deps
+
+      - name: Tạo thư mục lưu log
+        run: |
+          mkdir -p logs
+
+      - name: Xuất biến môi trường và Secrets sang .env
+        env:
+          VARS_JSON: ${{ toJson(vars) }}
+          SECRETS_JSON: ${{ toJson(secrets) }}
+        run: |
+          python utils/export_github_env.py
+
+      - name: Khởi chạy TikTok Streak Saver (Rep chuỗi)
+        run: |
+          python main.py
+
+      - name: Lưu trữ file log sau khi chạy
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: tiktok-streak-logs
+          path: logs/
+          retention-days: 7
+
+  # Giữ cho workflow không bị GitHub tự động vô hiệu hoá sau 60 ngày nếu repo không có commit mới
+  workflow-keepalive:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - uses: liskin/gh-workflow-keepalive@v1
